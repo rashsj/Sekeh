@@ -118,7 +118,7 @@ void txDetail(BuildContext context, Tx tx) {
     Text('${pos ? '+' : '−'} ${money(tx.amount.abs())}', style: vaz(26, c: pos ? kMint : kGold, w: FontWeight.w900)),
     const SizedBox(height: 12),
     GroupCard(child: Column(children: [
-      detailRow('تاریخ', '${faNum(tx.time.day)}/${faNum(tx.time.month)}/${faNum(tx.time.year)}'),
+      detailRow('تاریخ', '${faNum('${tx.time.day}')}/${faNum('${tx.time.month}')}/${faNum('${tx.time.year}')}'),
       detailRow('منبع', tx.method),
       if (tx.peer.isNotEmpty) detailRow('طرف', tx.peer),
       detailRow('پیگیری', tx.ref),
@@ -147,3 +147,4 @@ class WeekChart extends StatelessWidget {
     ])));
   }
 }
+// END-OF-WIDGETS
