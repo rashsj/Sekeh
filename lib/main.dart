@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -14,11 +16,17 @@ import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
+part 'widgets.dart';
 part 'home.dart';
+part 'flows.dart';
 part 'card.dart';
 part 'profile.dart';
 
-void main() => runApp(const SekkehApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light, systemNavigationBarColor: Color(0xFF081522), systemNavigationBarIconBrightness: Brightness.light));
+  runApp(const SekkehApp());
+}
 
 const Color kGold = Color(0xFFF4B740);
 const Color kGold2 = Color(0xFFFFD782);
@@ -26,7 +34,10 @@ const Color kInk = Color(0xFFF1F6FC);
 const Color kMut = Color(0xFF9FB2C6);
 const Color kBg = Color(0xFF081522);
 const Color kS1 = Color(0xFF0F2236);
+const Color kS2 = Color(0xFF162F49);
 const Color kMint = Color(0xFF39D39B);
+const Color kCoral = Color(0xFFFF6B7D);
+const Color kCyan = Color(0xFF4CC9F0);
 
 class GemTheme {
   final String id, name, place, wiki;
@@ -36,30 +47,32 @@ class GemTheme {
 }
 
 const List<GemTheme> kThemes = [
-  GemTheme('lapis', 'لاجورد • بند امیر', 'بند امیر، بامیان', 'Band-e_Amir_National_Park',
-      [Color(0xFF06182E), Color(0xFF0B2A5E), Color(0xFF1D5DBB)], Color(0xFF04101F), Color(0xFFFFD782)),
-  GemTheme('ruby', 'لعل • پامیر', 'پامیر، بدخشان', 'Pamir_Mountains',
-      [Color(0xFF2A0710), Color(0xFF4A0D22), Color(0xFFC2185B)], Color(0xFF1C040B), Color(0xFFFFD782)),
-  GemTheme('emerald', 'زمرد • پنجشیر', 'درهٔ پنجشیر', 'Panjshir_Valley',
-      [Color(0xFF03271A), Color(0xFF043523), Color(0xFF0E8F5E)], Color(0xFF02180F), Color(0xFFFFE9B0)),
-  GemTheme('sapphire', 'یاقوت • هندوکش', 'هندوکش، کابل', 'Hindu_Kush',
-      [Color(0xFF0A0A22), Color(0xFF1E1B6B), Color(0xFF4338CA)], Color(0xFF06061A), Color(0xFFBFE3FF)),
-  GemTheme('saffron', 'زعفران • هرات', 'مناره‌های هرات', 'Citadel_of_Herat',
-      [Color(0xFF2A1604), Color(0xFF5A2E08), Color(0xFFC2691A)], Color(0xFF1A0E02), Color(0xFFFFD782)),
-  GemTheme('turquoise', 'فیروزه • مزار', 'روضهٔ شریف، مزارشریف', 'Shrine_of_Ali',
-      [Color(0xFF032A31), Color(0xFF053A44), Color(0xFF0E7C8C)], Color(0xFF02181C), Color(0xFFFFE9B0)),
+  GemTheme('lapis', 'لاجورد • بند امیر', 'بند امیر، بامیان', 'Band-e_Amir_National_Park', [Color(0xFF06182E), Color(0xFF0B2A5E), Color(0xFF1D5DBB)], Color(0xFF04101F), Color(0xFFFFD782)),
+  GemTheme('ruby', 'لعل • پامیر', 'پامیر، بدخشان', 'Pamir_Mountains', [Color(0xFF2A0710), Color(0xFF4A0D22), Color(0xFFC2185B)], Color(0xFF1C040B), Color(0xFFFFD782)),
+  GemTheme('emerald', 'زمرد • پنجشیر', 'درهٔ پنجشیر', 'Panjshir_Valley', [Color(0xFF03271A), Color(0xFF043523), Color(0xFF0E8F5E)], Color(0xFF02180F), Color(0xFFFFE9B0)),
+  GemTheme('sapphire', 'یاقوت • هندوکش', 'هندوکش، کابل', 'Hindu_Kush', [Color(0xFF0A0A22), Color(0xFF1E1B6B), Color(0xFF4338CA)], Color(0xFF06061A), Color(0xFFBFE3FF)),
+  GemTheme('saffron', 'زعفران • هرات', 'مناره‌های هرات', 'Citadel_of_Herat', [Color(0xFF2A1604), Color(0xFF5A2E08), Color(0xFFC2691A)], Color(0xFF1A0E02), Color(0xFFFFD782)),
+  GemTheme('turquoise', 'فیروزه • مزار', 'روضهٔ شریف، مزارشریف', 'Shrine_of_Ali', [Color(0xFF032A31), Color(0xFF053A44), Color(0xFF0E7C8C)], Color(0xFF02181C), Color(0xFFFFE9B0)),
 ];
 
 class Tx {
-  final String title, cat, method, peer;
+  final String title, cat, method, peer, ref;
   final double amount;
   final DateTime time;
-  Tx(this.title, this.cat, this.amount, this.time, [this.method = 'کیف پول', this.peer = '']);
+  String status;
+  Tx(this.title, this.cat, this.amount, this.time, [this.method = 'کیف پول', this.peer = ''])
+      : ref = 'AF${DateTime.now().microsecondsSinceEpoch % 1000000000}', status = 'ok';
+}
+
+class Notif {
+  final IconData icon; final Color color; final String title, body; final DateTime time; bool read;
+  Notif(this.icon, this.color, this.title, this.body, this.time, [this.read = false]);
 }
 
 class Store extends ChangeNotifier {
   int themeIndex = 0;
-  bool hideBalance = false;
+  bool hideBalance = false, locked = false;
+  String pin = '1234';
   double balance = 22750;
   String bizName = 'فروشگاه احمدی';
   String tagline = 'پرداخت سریع و مطمئن با سِکّه';
@@ -69,6 +82,13 @@ class Store extends ChangeNotifier {
   bool showPhone = true, showWallet = true;
   Uint8List? logoBytes;
   final Map<String, String?> photoUrls = {};
+  final Set<String> loading = {};
+  Map<String, dynamic>? cashout;
+  final List<Notif> notifs = [
+    Notif(Icons.work_rounded, kMint, 'معاش عقرب واریز شد', '۲۴٬۵۰۰ افغانی از طریق APSS', DateTime.now().subtract(const Duration(days: 2))),
+    Notif(Icons.shield_rounded, kCyan, 'ورود به حساب', 'ورود موفق — کابل', DateTime.now().subtract(const Duration(hours: 6))),
+    Notif(Icons.qr_code_2_rounded, kGold, 'کارت کسب‌وکار فعال شد', 'کیوآر اختصاصی بساز و چاپ کن', DateTime.now().subtract(const Duration(days: 1))),
+  ];
   final List<Tx> txs = [
     Tx('مارکت کارته چهار', 'buy', -1250, DateTime.now().subtract(const Duration(hours: 3))),
     Tx('تاکسی کابل', 'transport', -180, DateTime.now().subtract(const Duration(hours: 6))),
@@ -82,7 +102,13 @@ class Store extends ChangeNotifier {
     Tx('هدیه از پدر', 'gift', 5000, DateTime.now().subtract(const Duration(days: 5))),
   ];
   GemTheme get theme => kThemes[themeIndex];
+  int get unread => notifs.where((n) => !n.read).length;
   void touch() => notifyListeners();
+  void ensurePhoto(GemTheme t) {
+    if (photoUrls.containsKey(t.id) || loading.contains(t.id)) return;
+    loading.add(t.id);
+    wikiThumb(t.wiki).then((u) { photoUrls[t.id] = u; loading.remove(t.id); touch(); });
+  }
 }
 
 final Store store = Store();
@@ -111,13 +137,11 @@ Future<String?> wikiThumb(String title) async {
     final r = await http.get(u);
     final m = RegExp(r'"source":"(https:[^"]+)"').firstMatch(r.body);
     return m?.group(1);
-  } catch (e) {
-    return null;
-  }
+  } catch (e) { return null; }
 }
 
 TextStyle vaz(double s, {Color c = kInk, FontWeight w = FontWeight.w500}) => GoogleFonts.vazirmatn(fontSize: s, color: c, fontWeight: w);
-TextStyle lalez(double s) => GoogleFonts.lalezar(fontSize: s, color: Colors.white);
+TextStyle lalez(double s, {Color c = Colors.white}) => GoogleFonts.lalezar(fontSize: s, color: c);
 TextStyle markazi(double s, Color c) => GoogleFonts.markaziText(fontSize: s, color: c, fontWeight: FontWeight.w600);
 TextStyle inter(double s, Color c) => GoogleFonts.inter(fontSize: s, color: c, fontWeight: FontWeight.w700, letterSpacing: 2);
 
@@ -125,24 +149,45 @@ class SekkehApp extends StatelessWidget {
   const SekkehApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: store,
-      builder: (context, _) {
-        final t = store.theme;
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'سِکّه',
-          theme: ThemeData(
-            useMaterial3: true,
-            brightness: Brightness.dark,
-            scaffoldBackgroundColor: kBg,
-            colorScheme: ColorScheme.dark(primary: t.bg[1], secondary: t.accent, surface: kS1, onSurface: kInk),
-            fontFamily: GoogleFonts.vazirmatn().fontFamily,
-          ),
-          home: const Root(),
-        );
-      },
-    );
+    return AnimatedBuilder(animation: store, builder: (context, _) {
+      final t = store.theme;
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'سِکّه',
+        theme: ThemeData(useMaterial3: true, brightness: Brightness.dark, scaffoldBackgroundColor: kBg, colorScheme: ColorScheme.dark(primary: t.bg[1], secondary: t.accent, surface: kS1, onSurface: kInk), fontFamily: GoogleFonts.vazirmatn().fontFamily),
+        home: const Gate(),
+      );
+    });
+  }
+}
+
+class Gate extends StatefulWidget {
+  const Gate({super.key});
+  @override
+  State<Gate> createState() => _GateState();
+}
+class _GateState extends State<Gate> with SingleTickerProviderStateMixin {
+  late final AnimationController c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..forward();
+  bool done = false;
+  @override
+  void initState() { super.initState(); Timer(const Duration(milliseconds: 2000), () { if (mounted) setState(() => done = true); }); }
+  @override
+  void dispose() { c.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) {
+    if (done) return store.locked ? const Lock() : const Root();
+    final t = store.theme;
+    return Scaffold(body: Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(0, -.7), radius: 1.1, colors: [t.bg[1], kBg])), child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: Container(width: 104, height: 104, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [kGold2, kGold]), boxShadow: [BoxShadow(color: kGold.withOpacity(.5), blurRadius: 30)]), child: Center(child: Text('سکه', style: lalez(38, c: const Color(0xFF6B4708)))))),
+      const SizedBox(height: 18),
+      FadeTransition(opacity: c, child: Text('سِکّه', style: lalez(38, c: kGold))),
+      const SizedBox(height: 6),
+      FadeTransition(opacity: c, child: Text('کیف پول دیجیتال افغانستان', style: vaz(13, c: kMut))),
+      const SizedBox(height: 8),
+      FadeTransition(opacity: c, child: Text('Beheshti Brothers', style: inter(11, kMut))),
+      const SizedBox(height: 26),
+      SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: kGold)),
+    ]))));
   }
 }
 
@@ -151,89 +196,77 @@ class Root extends StatefulWidget {
   @override
   State<Root> createState() => _RootState();
 }
-
 class _RootState extends State<Root> {
   int page = 0;
   final pages = const [Home(), TxPage(), CardPage(), Profile()];
   @override
   Widget build(BuildContext context) {
+    final t = store.theme;
+    store.ensurePhoto(t);
+    final url = store.photoUrls[t.id];
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(index: page, children: pages),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: SizedBox(
-        width: 58, height: 58,
-        child: FloatingActionButton(
-          backgroundColor: kGold, foregroundColor: const Color(0xFF2B2108),
-          shape: const CircleBorder(),
-          onPressed: () => paySheet(context, 'حوالهٔ سریع', 'transfer'),
-          child: const Icon(Icons.add_rounded, size: 28),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: kS1,
-        selectedItemColor: store.theme.accent,
-        unselectedItemColor: kMut,
-        selectedLabelStyle: vaz(10, w: FontWeight.w700),
-        unselectedLabelStyle: vaz(10, w: FontWeight.w700),
-        currentIndex: page >= 2 ? page + 1 : page,
-        onTap: (i) {
-          if (i == 2) { paySheet(context, 'حوالهٔ سریع', 'transfer'); return; }
-          setState(() => page = i > 2 ? i - 1 : i);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'خانه'),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'تراکنش‌ها'),
-          BottomNavigationBarItem(icon: Icon(Icons.circle, color: Colors.transparent), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code_2_rounded), label: 'کارت من'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'پروفایل'),
-        ],
+      body: Stack(children: [
+        if (url != null) Positioned.fill(child: Opacity(opacity: .16, child: Image.network(url, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox()))),
+        Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [kBg.withOpacity(.7), kBg.withOpacity(.92)])))),
+        IndexedStack(index: page, children: pages),
+      ]),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.fromLTRB(8, 6, 8, MediaQuery.of(context).padding.bottom + 8),
+        decoration: BoxDecoration(color: kS1.withOpacity(.94), border: Border(top: BorderSide(color: Colors.white.withOpacity(.08)))),
+        child: Row(children: [
+          nav(0, Icons.home_rounded, 'خانه'),
+          nav(1, Icons.receipt_long_rounded, 'تراکنش‌ها'),
+          Expanded(child: Center(child: GemFab(onTap: () => openFlow(context, 'transfer')))),
+          nav(2, Icons.qr_code_2_rounded, 'کارت من'),
+          nav(3, Icons.person_rounded, 'پروفایل'),
+        ]),
       ),
     );
   }
+  Widget nav(int i, IconData ic, String label) {
+    final on = page == i;
+    final t = store.theme;
+    return Expanded(child: InkWell(onTap: () => setState(() => page = i), borderRadius: BorderRadius.circular(14), child: Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Column(mainAxisSize: MainAxisSize.min, children: [
+      Icon(ic, size: 24, color: on ? t.accent : kMut),
+      const SizedBox(height: 3),
+      Text(label, style: vaz(10, c: on ? t.accent : kMut, w: FontWeight.w700)),
+      const SizedBox(height: 3),
+      Container(width: 5, height: 5, decoration: BoxDecoration(shape: BoxShape.circle, color: on ? t.accent : Colors.transparent)),
+    ]))));
+  }
 }
 
-void paySheet(BuildContext context, String title, String cat) {
-  final ctrl = TextEditingController();
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: kS1,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-    builder: (c) => Padding(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(c).viewInsets.bottom + 24),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 42, height: 4.5, decoration: BoxDecoration(color: kMut.withOpacity(.4), borderRadius: BorderRadius.circular(99))),
-        const SizedBox(height: 14),
-        Text(title, style: vaz(17, w: FontWeight.w900)),
-        const SizedBox(height: 14),
-        TextField(
-          controller: ctrl, keyboardType: TextInputType.number, style: vaz(15),
-          decoration: InputDecoration(hintText: 'مبلغ (افغانی)', hintStyle: vaz(13, c: kMut), filled: true, fillColor: kBg, border: OutlineInputBorder(borderRadius: BorderRadius.circular(14))),
-        ),
-        const SizedBox(height: 14),
-        SizedBox(
-          width: double.infinity, height: 50,
-          child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: store.theme.bg[1]),
-            onPressed: () {
-              final v = double.tryParse(ctrl.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-              if (v <= 0 || v > store.balance) {
-                ScaffoldMessenger.of(c).showSnackBar(const SnackBar(content: Text('مبلغ یا موجودی معتبر نیست')));
-                return;
-              }
-              store.balance -= v;
-              store.txs.insert(0, Tx(title, cat, -v, DateTime.now()));
-              store.touch();
-              Navigator.pop(c);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$title — ${money(v)} انجام شد ✓')));
-            },
-            child: Text('تایید و پرداخت', style: vaz(15, c: Colors.white, w: FontWeight.w800)),
-          ),
-        ),
-      ]),
-    ),
-  );
+class Lock extends StatefulWidget {
+  const Lock({super.key});
+  @override
+  State<Lock> createState() => _LockState();
 }
-// END-OF-MAIN
+class _LockState extends State<Lock> {
+  String buf = ''; bool err = false;
+  void key(String k) {
+    setState(() { if (k == 'del') { if (buf.isNotEmpty) buf = buf.substring(0, buf.length - 1); } else if (buf.length < 4) buf += k; });
+    if (buf.length == 4) Timer(const Duration(milliseconds: 160), () {
+      if (buf == store.pin) { store.locked = false; store.touch(); }
+      else { setState(() { err = true; buf = ''; }); Timer(const Duration(milliseconds: 600), () { if (mounted) setState(() => err = false); }); }
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+    final t = store.theme;
+    return Scaffold(body: Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(0, -.6), radius: 1.1, colors: [t.bg[1], kBg])), child: SafeArea(child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      CircleAvatar(radius: 36, backgroundColor: t.bg[1], child: Text('ف', style: vaz(26, c: Colors.white, w: FontWeight.w900))),
+      const SizedBox(height: 12),
+      Text('فرید احمدزی', style: vaz(17, w: FontWeight.w900)),
+      const SizedBox(height: 4),
+      Text('رمز ۴ رقمی را وارد کنید', style: vaz(12, c: kMut)),
+      const SizedBox(height: 18),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(4, (i) => Container(margin: const EdgeInsets.symmetric(horizontal: 8), width: 15, height: 15, decoration: BoxDecoration(shape: BoxShape.circle, color: i < buf.length ? t.accent : Colors.transparent, border: Border.all(color: err ? kCoral : kMut, width: 2))))),
+      const SizedBox(height: 8),
+      SizedBox(height: 20, child: Text(err ? 'رمز اشتباه است' : '', style: vaz(12, c: kCoral, w: FontWeight.w700))),
+      SizedBox(width: 262, child: Keypad(onKey: key, round: true)),
+      const SizedBox(height: 12),
+      Text('رمز پیش‌فرض: ۱۲۳۴', style: vaz(10.5, c: kMut.withOpacity(.7))),
+    ])))));
+  }
+}
