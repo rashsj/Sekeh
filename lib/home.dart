@@ -12,7 +12,7 @@ class Home extends StatelessWidget {
         CircleAvatar(radius: 23, backgroundColor: t.bg[1], child: Text('ف', style: vaz(18, c: Colors.white, w: FontWeight.w900))),
         const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('سلام، فرید 👋', style: vaz(17, w: FontWeight.w900)), Text(t.place, style: vaz(11, c: kMut))])),
-        IconButton(onPressed: () => store.hideBalance = !store.hideBalance..touch(), icon: Icon(store.hideBalance ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: t.accent)),
+        IconButton(onPressed: () { store.hideBalance = !store.hideBalance; store.touch(); }, icon: Icon(store.hideBalance ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: t.accent)),
         Stack(children: [
           IconButton(onPressed: () => notifSheet(context), icon: const Icon(Icons.notifications_rounded, color: kInk)),
           if (store.unread > 0) Positioned(right: 6, top: 6, child: Container(padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2), decoration: BoxDecoration(color: kCoral, borderRadius: BorderRadius.circular(9)), child: Text(faNum('${store.unread}'), style: vaz(9, c: Colors.white, w: FontWeight.w900)))),
@@ -108,3 +108,4 @@ class _TxPageState extends State<TxPage> {
     ]));
   }
 }
+// END-OF-HOME
