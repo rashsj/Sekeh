@@ -23,7 +23,7 @@ class Profile extends StatelessWidget {
         Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(gradient: const LinearGradient(colors: [kGold2, kGold]), borderRadius: BorderRadius.circular(99)), child: Text('تایید شده با تذکره', style: vaz(10.5, c: const Color(0xFF2B2108), w: FontWeight.w900))),
       ])),
       const SizedBox(height: 18),
-      Row(children: [stat('${faNum(store.txs.length)}', 'تراکنش', t.accent), const SizedBox(width: 8), stat('۱۲۴۰', 'امتیاز', t.accent), const SizedBox(width: 8), stat('طلایی', 'سطح', kGold)]),
+      Row(children: [stat(faNum('${store.txs.length}'), 'تراکنش', t.accent), const SizedBox(width: 8), stat('۱۲۴۰', 'امتیاز', t.accent), const SizedBox(width: 8), stat('طلایی', 'سطح', kGold)]),
       const SizedBox(height: 10),
       GroupCard(child: Padding(padding: const EdgeInsets.all(14), child: Column(children: [Row(children: [Text('۶۲٪ تا پلاتینیوم', style: vaz(11.5, w: FontWeight.w800)), const Spacer(), Text('۷۶۰ امتیاز', style: vaz(11, c: kMut))]), const SizedBox(height: 9), ClipRRect(borderRadius: BorderRadius.circular(99), child: LinearProgressIndicator(value: .62, minHeight: 7, backgroundColor: kS2, color: kGold))]))),
       SectionTitle('کسب‌وکار و ظاهر'),
@@ -76,7 +76,7 @@ class _SupportState extends State<Support> {
   void send() { final v = ctrl.text.trim(); if (v.isEmpty) return; setState(() => msgs.add({'me': true, 't': v})); ctrl.clear(); Future.delayed(const Duration(milliseconds: 800), () { if (mounted) setState(() => msgs.add({'me': false, 't': bot(v)})); }); }
   @override
   Widget build(BuildContext context) => Scaffold(backgroundColor: kBg, appBar: AppBar(backgroundColor: kS1, title: Text('پشتیبانی', style: vaz(16, w: FontWeight.w900))), body: Column(children: [
-    Expanded(child: ListView(padding: const EdgeInsets.all(16), children: msgs.map((m) => Align(alignment: (m['me'] as bool) ? Alignment.centerLeft : Alignment.centerRight, child: Container(margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11), constraints: const BoxConstraints(maxWidth: 300), decoration: BoxDecoration(color: (m['me'] as bool) ? store.theme.bg[1] : kS1, borderRadius: BorderRadius.circular(18)), child: Text(m['t'] as String, style: vaz(13, c: (m['me'] as bool) ? Colors.white : kInk, height: 1.8))))).toList())),
+    Expanded(child: ListView(padding: const EdgeInsets.all(16), children: msgs.map((m) => Align(alignment: (m['me'] as bool) ? Alignment.centerLeft : Alignment.centerRight, child: Container(margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11), constraints: const BoxConstraints(maxWidth: 300), decoration: BoxDecoration(color: (m['me'] as bool) ? store.theme.bg[1] : kS1, borderRadius: BorderRadius.circular(18)), child: Text(m['t'] as String, style: vaz(13, c: (m['me'] as bool) ? Colors.white : kInk))))).toList())),
     Padding(padding: EdgeInsets.fromLTRB(12, 6, 12, MediaQuery.of(context).padding.bottom + 12), child: Row(children: [
       Expanded(child: TextField(controller: ctrl, style: vaz(13), decoration: InputDecoration(hintText: 'پیام…', hintStyle: vaz(12, c: kMut), filled: true, fillColor: kS1, border: OutlineInputBorder(borderRadius: BorderRadius.circular(99))))),
       const SizedBox(width: 8),
@@ -84,3 +84,4 @@ class _SupportState extends State<Support> {
     ])),
   ]));
 }
+// END-OF-PROFILE
