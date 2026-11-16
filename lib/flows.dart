@@ -26,20 +26,22 @@ class _FlowSheetState extends State<FlowSheet> {
     if (widget.type == 'cashout') {
       code = '${100000 + DateTime.now().microsecondsSinceEpoch % 900000}';
       store.cashout = {'code': code, 'amount': amount, 'agent': _agents[agent][0]};
-      store.txs.insert(0, Tx('برداشت از ${_agents[agent][0]}', 'cashout', -(amount + 10), DateTime.now(), 'کیف پول', _agents[agent][1] as String));
-      store.balance -= amount + 10;
+      store.txs.insert(0, Tx('برداشت از ${_agents[agent][0]}', 'cashout', (-(amount + 10)).toDouble(), DateTime.now(), 'کیف پول', _agents[agent][1] as String));
+      store.balance -= (amount + 10).toDouble();
       codeTimer = Timer.periodic(const Duration(seconds: 1), (t) { if (!mounted) { t.cancel(); return; } setState(() => codeLeft--); if (codeLeft <= 0) { t.cancel(); refund(); } });
     } else {
-      store.txs.insert(0, Tx(title, widget.type == 'topup' ? 'topup' : widget.type, widget.type == 'topup' ? amount : -total, DateTime.now(), bank ? 'حواله APSS' : 'کیف پول', toDest ?? ''));
-      store.balance += widget.type == 'topup' ? amount : -total;
+      final double amt = (widget.type == 'topup' ? amount : -total).toDouble();
+      store.txs.insert(0, Tx(title, widget.type == 'topup' ? 'topup' : widget.type, amt, DateTime.now(), bank ? 'حواله APSS' : 'کیف پول', toDest ?? ''));
+      store.balance += amt;
     }
     store.touch();
     setState(() => step = 9);
   }
   void refund() {
     final c = store.cashout; if (c == null) return;
-    store.balance += (c['amount'] as int) + 10;
-    store.txs.insert(0, Tx('برگشت برداشت', 'refund', (c['amount'] as int) + 10, DateTime.now()));
+    final double back = ((c['amount'] as int) + 10).toDouble();
+    store.balance += back;
+    store.txs.insert(0, Tx('برگشت برداشت', 'refund', back, DateTime.now()));
     store.cashout = null; store.touch();
     if (mounted) setState(() => step = 8);
   }
@@ -128,7 +130,7 @@ class _FlowSheetState extends State<FlowSheet> {
     GroupCard(child: Column(children: [
       if (toName != null) detailRow('به', toName!),
       if (toDest != null) detailRow('مقصد', toDest!),
-      detailRow('مبلغ', money(widget.type == 'charge' ? amount : widget.type == 'net' ? (_packs[pack][2] as int) : widget.type == 'bill' ? (bill ?? 0) : amount)),
+      detailRow('مبلغ', money(total)),
       detailRow('کارمزد', fee > 0 ? money(fee) : 'رایگان'),
       detailRow('مجموع', money(total)),
     ])),
@@ -166,3 +168,4 @@ class _FlowSheetState extends State<FlowSheet> {
     SizedBox(width: double.infinity, height: 48, child: FilledButton(style: FilledButton.styleFrom(backgroundColor: t.bg[1]), onPressed: () { Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const CardPage())); }, child: Text('ساخت کارت کسب‌وکار', style: vaz(14, c: Colors.white, w: FontWeight.w800)))),
   ]);
 }
+// END-OF-FLOWS
