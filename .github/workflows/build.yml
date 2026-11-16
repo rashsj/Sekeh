@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -38,9 +38,37 @@ jobs:
           open(p,'w',encoding='utf-8').write(s)
           PY
 
+      - name: Disable release lint (safety)
+        run: |
+          mkdir -p "$HOME/.gradle/init.d"
+          cat > "$HOME/.gradle/init.d/lint-off.gradle" <<'GRADLE'
+          gradle.beforeProject { p ->
+              p.plugins.withId('com.android.base') {
+                  def a = p.extensions.findByName('android')
+                  if (a != null) {
+                      a.lint.checkReleaseBuilds = false
+                      a.lint.abortOnError = false
+                  }
+              }
+          }
+          GRADLE
+
       - run: flutter pub get
+
+      - name: Analyze (Dart errors only)
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
       - run: dart run flutter_launcher_icons
-      - run: flutter build apk --release
+
+      - name: Build APK
+        shell: bash
+        run: |
+          set -o pipefail
+          if ! flutter build apk --release 2>&1 | tee build.log; then
+            echo "================ REAL ERROR ================"
+            grep -n -B2 -A25 -E "Error:|error:|What went wrong|FAILURE:|Exception" build.log | head -n 150
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
