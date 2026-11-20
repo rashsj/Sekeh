@@ -70,11 +70,12 @@ class IconPainter extends CustomPainter {
       cv.drawCircle(const Offset(392, 322), 13, Paint()..color = Colors.white.withOpacity(.95));
     }
     cv.restore();
-  }
-  void _txt(Canvas cv, String s, double x, double y, double fs, {Shader? shader}) {
-    final tp = TextPainter(text: TextSpan(text: s, style: GoogleFonts.lalezar(fontSize: fs, color: shader == null ? const Color(0xFF6B4708) : Colors.white, foreground: shader != null ? (Paint()..shader = shader) : null)), textDirection: TextDirection.rtl)..layout();
+      void _txt(Canvas cv, String s, double x, double y, double fs, {Shader? shader}) {
+    final tp = TextPainter(
+      text: TextSpan(text: s, style: TextStyle(fontFamily: GoogleFonts.lalezar().fontFamily, fontSize: fs, color: shader == null ? const Color(0xFF6B4708) : null, foreground: shader == null ? null : (Paint()..shader = shader))),
+      textDirection: TextDirection.rtl)..layout();
     tp.paint(cv, Offset(x - tp.width / 2, y - tp.height * .82));
-  }
+      }
   @override
   bool shouldRepaint(covariant IconPainter o) => o.style != style || o.pal != pal;
 }
