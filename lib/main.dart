@@ -22,33 +22,18 @@ part 'flows.dart';
 part 'card.dart';
 part 'profile.dart';
 
+const String kBuildTag = String.fromEnvironment('BUILD_TAG', defaultValue: 'dev');
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  ErrorWidget.builder = (FlutterErrorDetails d) => Container(
-        color: const Color(0xFF8B1D1D),
-        padding: const EdgeInsets.all(6),
-        alignment: Alignment.center,
-        child: Text(d.exceptionAsString(), textDirection: TextDirection.ltr, style: const TextStyle(color: Colors.white, fontSize: 10)),
-      );
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: Color(0xFF141B3C),
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
+  ErrorWidget.builder = (d) => Container(color: const Color(0xFF8B1D1D), padding: const EdgeInsets.all(6), alignment: Alignment.center, child: Text(d.exceptionAsString(), textDirection: TextDirection.ltr, style: const TextStyle(color: Colors.white, fontSize: 10)));
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light, systemNavigationBarColor: Color(0xFF141B3C), systemNavigationBarIconBrightness: Brightness.light));
   runApp(const SekkehApp());
 }
 
-const Color kGold = Color(0xFFF5B93E);
-const Color kGold2 = Color(0xFFFFDD93);
-const Color kInk = Color(0xFFF2F5FF);
-const Color kMut = Color(0xFFA3ADD4);
-const Color kBg = Color(0xFF0B1026);
-const Color kS1 = Color(0xFF141B3C);
-const Color kS2 = Color(0xFF1D2650);
-const Color kMint = Color(0xFF3ED9A0);
-const Color kCoral = Color(0xFFFF6B81);
-const Color kCyan = Color(0xFF2DD4BF);
+const Color kGold = Color(0xFFF5B93E), kGold2 = Color(0xFFFFDD93), kInk = Color(0xFFF2F5FF), kMut = Color(0xFFA3ADD4);
+const Color kBg = Color(0xFF0B1026), kS1 = Color(0xFF141B3C), kS2 = Color(0xFF1D2650), kS3 = Color(0xFF2A3568);
+const Color kMint = Color(0xFF3ED9A0), kCoral = Color(0xFFFF6B81), kCyan = Color(0xFF2DD4BF), kViolet = Color(0xFF8B7CFF), kAmber = Color(0xFFFFB84D);
 
 class GemTheme {
   final String id, name, place, wiki;
@@ -71,8 +56,7 @@ class Tx {
   final double amount;
   final DateTime time;
   String status;
-  Tx(this.title, this.cat, this.amount, this.time, [this.method = 'کیف پول', this.peer = ''])
-      : ref = 'AF${DateTime.now().microsecondsSinceEpoch % 1000000000}', status = 'ok';
+  Tx(this.title, this.cat, this.amount, this.time, [this.method = 'کیف پول', this.peer = '']) : ref = 'AF${DateTime.now().microsecondsSinceEpoch % 1000000000}', status = 'ok';
 }
 
 class Notif {
@@ -81,15 +65,10 @@ class Notif {
 }
 
 class Store extends ChangeNotifier {
-  int themeIndex = 0;
-  bool hideBalance = false, locked = false;
-  String pin = '1234';
-  double balance = 22750;
-  String bizName = 'فروشگاه احمدی';
-  String tagline = 'پرداخت سریع و مطمئن با سِکّه';
-  String phone = '0700123456';
-  String walletId = 'SEKKEH-0700';
-  String format = 'square';
+  int themeIndex = 0, iconStyle = 0, iconPal = 0;
+  bool hideBalance = false, locked = false, sound = true, mascotOn = true;
+  String pin = '1234', bizName = 'فروشگاه احمدی', tagline = 'پرداخت سریع و مطمئن با سِکّه';
+  String phone = '0700123456', walletId = 'SEKKEH-0700', format = 'square';
   bool showPhone = true, showWallet = true;
   Uint8List? logoBytes;
   final Map<String, String?> photoUrls = {};
@@ -123,31 +102,23 @@ class Store extends ChangeNotifier {
 }
 
 final Store store = Store();
+final ValueNotifier<Offset> pointer = ValueNotifier<Offset>(const Offset(-999, -999));
+final GlobalKey mascotKey = GlobalKey();
+
+void tap() { if (store.sound) SystemSound.play(SystemSoundType.click); HapticFeedback.selectionClick(); }
+void okBuzz() { if (store.sound) SystemSound.play(SystemSoundType.click); HapticFeedback.mediumImpact(); }
 
 String faNum(String s) => s.replaceAllMapped(RegExp(r'[0-9]'), (m) => '۰۱۲۳۴۵۶۷۸۹'[int.parse(m.group(0)!)]);
-String group(num v) {
-  final s = v.abs().round().toString();
-  final b = StringBuffer();
-  for (int i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) b.write('٬');
-    b.write(s[i]);
-  }
-  return b.toString();
-}
+String group(num v) { final s = v.abs().round().toString(); final b = StringBuffer(); for (int i = 0; i < s.length; i++) { if (i > 0 && (s.length - i) % 3 == 0) b.write('٬'); b.write(s[i]); } return b.toString(); }
 String money(num v) => '${faNum(group(v))} افغانی';
-String localPhone(String p) {
-  final d = p.replaceAll(RegExp(r'[^0-9]'), '');
-  if (d.length < 10) return p;
-  return '${d.substring(0, 4)} ${d.substring(4, 7)} ${d.substring(7)}';
-}
+String localPhone(String p) { final d = p.replaceAll(RegExp(r'[^0-9]'), ''); if (d.length < 10) return p; return '${d.substring(0, 4)} ${d.substring(4, 7)} ${d.substring(7)}'; }
 String payload() => 'SEKKEH://pay?to=${Uri.encodeComponent(store.phone)}&biz=${Uri.encodeComponent(store.bizName)}';
 
 Future<String?> wikiThumb(String title) async {
   try {
     final u = Uri.parse('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=1200&redirects=1&titles=${Uri.encodeComponent(title)}');
     final r = await http.get(u);
-    final m = RegExp(r'"source":"(https:[^"]+)"').firstMatch(r.body);
-    return m?.group(1);
+    return RegExp(r'"source":"(https:[^"]+)"').firstMatch(r.body)?.group(1);
   } catch (e) { return null; }
 }
 
@@ -159,26 +130,14 @@ TextStyle inter(double s, Color c) => GoogleFonts.inter(fontSize: s, color: c, f
 class SekkehApp extends StatelessWidget {
   const SekkehApp({super.key});
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: store,
-      builder: (context, _) {
-        final t = store.theme;
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'سِکّه',
-          theme: ThemeData(
-            useMaterial3: true,
-            brightness: Brightness.dark,
-            scaffoldBackgroundColor: kBg,
-            colorScheme: ColorScheme.dark(primary: t.bg[1], secondary: t.accent, surface: kS1, onSurface: kInk),
-            fontFamily: GoogleFonts.vazirmatn().fontFamily,
-          ),
-          home: const Gate(),
-        );
-      },
+  Widget build(BuildContext context) => AnimatedBuilder(animation: store, builder: (context, _) {
+    final t = store.theme;
+    return MaterialApp(
+      debugShowCheckedModeBanner: false, title: 'سِکّه',
+      theme: ThemeData(useMaterial3: true, brightness: Brightness.dark, scaffoldBackgroundColor: kBg, colorScheme: ColorScheme.dark(primary: t.bg[1], secondary: t.accent, surface: kS1, onSurface: kInk), fontFamily: GoogleFonts.vazirmatn().fontFamily),
+      home: const Gate(),
     );
-  }
+  });
 }
 
 class Gate extends StatefulWidget {
@@ -187,37 +146,29 @@ class Gate extends StatefulWidget {
   State<Gate> createState() => _GateState();
 }
 class _GateState extends State<Gate> with SingleTickerProviderStateMixin {
-  late final AnimationController c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..forward();
+  late final AnimationController c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..forward();
   bool done = false;
   @override
-  void initState() { super.initState(); Timer(const Duration(milliseconds: 1900), () { if (mounted) setState(() => done = true); }); }
+  void initState() { super.initState(); Timer(const Duration(milliseconds: 2000), () { if (mounted) setState(() => done = true); }); }
   @override
   void dispose() { c.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) {
     if (done) return store.locked ? const Lock() : const Root();
-    final t = store.theme;
     final mq = MediaQuery.of(context);
-    return Scaffold(
-      backgroundColor: kBg,
-      body: SizedBox(
-        width: mq.size.width,
-        height: mq.size.height,
-        child: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: Container(width: 104, height: 104, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [kGold2, kGold]), boxShadow: [BoxShadow(color: kGold.withOpacity(.5), blurRadius: 30)]), child: Center(child: Text('سکه', style: lalez(38, c: const Color(0xFF6B4708)))))),
-            const SizedBox(height: 18),
-            FadeTransition(opacity: c, child: Text('سِکّه', style: lalez(38, c: kGold))),
-            const SizedBox(height: 6),
-            FadeTransition(opacity: c, child: Text('کیف پول دیجیتال افغانستان', style: vaz(13, c: kMut))),
-            const SizedBox(height: 8),
-            FadeTransition(opacity: c, child: Text('Beheshti Brothers', style: inter(11, kMut))),
-            const SizedBox(height: 26),
-            const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: kGold)),
-          ]),
-        ),
-      ),
-    );
+    return Scaffold(backgroundColor: kBg, body: SizedBox(width: mq.size.width, height: mq.size.height, child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: const SekkehIcon(size: 112)),
+      const SizedBox(height: 20),
+      FadeTransition(opacity: c, child: Text('سِکّه', style: lalez(40, c: kGold))),
+      const SizedBox(height: 4),
+      FadeTransition(opacity: c, child: Text('کیف پول دیجیتال افغانستان', style: vaz(13, c: kMut))),
+      const SizedBox(height: 6),
+      FadeTransition(opacity: c, child: Text('Beheshti Brothers', style: inter(11, kMut))),
+      const SizedBox(height: 24),
+      const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: kGold)),
+      const SizedBox(height: 14),
+      Text('build $kBuildTag', style: inter(9, kMut.withOpacity(.6))),
+    ]))));
   }
 }
 
@@ -234,61 +185,52 @@ class _RootState extends State<Root> {
     final t = store.theme;
     store.ensurePhoto(t);
     final url = store.photoUrls[t.id];
-    final hasPhoto = url != null && url.isNotEmpty;
+    final has = url != null && url.isNotEmpty;
     final pages = <Widget>[const Home(), const TxPage(), const CardPage(), const Profile()];
-
     return Scaffold(
       backgroundColor: kBg,
       body: SizedBox(
-        width: mq.size.width,
-        height: mq.size.height,
-        child: Column(
-          children: [
-            Expanded(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: kBg,
-                  image: hasPhoto ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover, opacity: .16, onError: (_, __) {}) : null,
-                  gradient: hasPhoto ? null : LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [t.bg[0], kBg]),
-                ),
-                child: IndexedStack(index: page, children: pages),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(color: kS1, border: Border(top: BorderSide(color: Colors.white.withOpacity(.08)))),
-              padding: EdgeInsets.fromLTRB(6, 8, 6, mq.padding.bottom + 10),
-              child: Row(children: [
-                navItem(0, Icons.home_rounded, 'خانه'),
-                navItem(1, Icons.receipt_long_rounded, 'تراکنش‌ها'),
-                Expanded(child: Center(child: GemFab(onTap: () => openFlow(context, 'transfer')))),
-                navItem(2, Icons.qr_code_2_rounded, 'کارت من'),
-                navItem(3, Icons.person_rounded, 'پروفایل'),
+        width: mq.size.width, height: mq.size.height,
+        child: Column(children: [
+          Expanded(
+            child: Listener(
+              onPointerDown: (e) { pointer.value = e.position; },
+              onPointerMove: (e) { pointer.value = e.position; },
+              child: Stack(children: [
+                Positioned.fill(child: DecoratedBox(
+                  decoration: BoxDecoration(color: kBg,
+                    image: has ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover, opacity: .18, onError: (_, __) {}) : null,
+                    gradient: has ? null : LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [t.bg[0], kBg])),
+                  child: IndexedStack(index: page, children: pages),
+                )),
+                if (store.mascotOn && page == 0)
+                  Positioned(top: 0, left: 14, child: IgnorePointer(child: Mascot(key: mascotKey))),
               ]),
             ),
-          ],
-        ),
+          ),
+          Container(
+            decoration: BoxDecoration(color: kS1, border: Border(top: BorderSide(color: Colors.white.withOpacity(.08)))),
+            padding: EdgeInsets.fromLTRB(6, 8, 6, mq.padding.bottom + 10),
+            child: Row(children: [
+              navItem(0, Icons.home_rounded, 'خانه'),
+              navItem(1, Icons.receipt_long_rounded, 'تراکنش‌ها'),
+              Expanded(child: Center(child: GemFab(onTap: () { tap(); quickMenu(context); }))),
+              navItem(2, Icons.qr_code_2_rounded, 'کارت من'),
+              navItem(3, Icons.person_rounded, 'پروفایل'),
+            ]),
+          ),
+        ]),
       ),
     );
   }
   Widget navItem(int i, IconData ic, String label) {
-    final on = page == i;
-    final t = store.theme;
-    return Expanded(
-      child: InkWell(
-        onTap: () => setState(() => page = i),
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(ic, size: 23, color: on ? t.accent : kMut),
-            const SizedBox(height: 3),
-            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: vaz(9.5, c: on ? t.accent : kMut, w: FontWeight.w700)),
-            const SizedBox(height: 3),
-            Container(width: 5, height: 5, decoration: BoxDecoration(shape: BoxShape.circle, color: on ? t.accent : Colors.transparent)),
-          ]),
-        ),
-      ),
-    );
+    final on = page == i; final t = store.theme;
+    return Expanded(child: InkWell(onTap: () { tap(); setState(() => page = i); }, borderRadius: BorderRadius.circular(14), child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Column(mainAxisSize: MainAxisSize.min, children: [
+      Icon(ic, size: 23, color: on ? t.accent : kMut), const SizedBox(height: 3),
+      Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: vaz(9.5, c: on ? t.accent : kMut, w: FontWeight.w700)),
+      const SizedBox(height: 3),
+      Container(width: 5, height: 5, decoration: BoxDecoration(shape: BoxShape.circle, color: on ? t.accent : Colors.transparent)),
+    ]))));
   }
 }
 
@@ -300,43 +242,27 @@ class Lock extends StatefulWidget {
 class _LockState extends State<Lock> {
   String buf = ''; bool err = false;
   void key(String k) {
+    tap();
     setState(() { if (k == 'del') { if (buf.isNotEmpty) buf = buf.substring(0, buf.length - 1); } else if (buf.length < 4) buf += k; });
     if (buf.length == 4) Timer(const Duration(milliseconds: 160), () {
-      if (buf == store.pin) { store.locked = false; store.touch(); }
+      if (buf == store.pin) { okBuzz(); store.locked = false; store.touch(); }
       else { setState(() { err = true; buf = ''; }); Timer(const Duration(milliseconds: 600), () { if (mounted) setState(() => err = false); }); }
     });
   }
   @override
   Widget build(BuildContext context) {
-    final t = store.theme;
-    final mq = MediaQuery.of(context);
-    return Scaffold(
-      backgroundColor: kBg,
-      body: SizedBox(
-        width: mq.size.width,
-        height: mq.size.height,
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                CircleAvatar(radius: 36, backgroundColor: t.bg[1], child: Text('ف', style: vaz(26, c: Colors.white, w: FontWeight.w900))),
-                const SizedBox(height: 12),
-                Text('فرید احمدزی', style: vaz(17, w: FontWeight.w900)),
-                const SizedBox(height: 4),
-                Text('رمز ۴ رقمی را وارد کنید', style: vaz(12, c: kMut)),
-                const SizedBox(height: 18),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(4, (i) => Container(margin: const EdgeInsets.symmetric(horizontal: 8), width: 15, height: 15, decoration: BoxDecoration(shape: BoxShape.circle, color: i < buf.length ? t.accent : Colors.transparent, border: Border.all(color: err ? kCoral : kMut, width: 2))))),
-                const SizedBox(height: 8),
-                SizedBox(height: 20, child: Text(err ? 'رمز اشتباه است' : '', style: vaz(12, c: kCoral, w: FontWeight.w700))),
-                SizedBox(width: 262, child: Keypad(onKey: key, round: true)),
-                const SizedBox(height: 12),
-                Text('رمز پیش‌فرض: ۱۲۳۴', style: vaz(10.5, c: kMut)),
-              ]),
-            ),
-          ),
-        ),
-      ),
-    );
+    final t = store.theme; final mq = MediaQuery.of(context);
+    return Scaffold(backgroundColor: kBg, body: SizedBox(width: mq.size.width, height: mq.size.height, child: SafeArea(child: Center(child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      const SekkehIcon(size: 64), const SizedBox(height: 14),
+      Text('فرید احمدزی', style: vaz(17, w: FontWeight.w900)), const SizedBox(height: 4),
+      Text('رمز ۴ رقمی را وارد کنید', style: vaz(12, c: kMut)), const SizedBox(height: 18),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(4, (i) => Container(margin: const EdgeInsets.symmetric(horizontal: 8), width: 15, height: 15, decoration: BoxDecoration(shape: BoxShape.circle, color: i < buf.length ? t.accent : Colors.transparent, border: Border.all(color: err ? kCoral : kMut, width: 2))))),
+      const SizedBox(height: 8),
+      SizedBox(height: 20, child: Text(err ? 'رمز اشتباه است' : '', style: vaz(12, c: kCoral, w: FontWeight.w700))),
+      SizedBox(width: 262, child: Keypad(onKey: key, round: true)),
+      const SizedBox(height: 12),
+      Text('رمز پیش‌فرض: ۱۲۳۴', style: vaz(10.5, c: kMut)),
+    ]))))));
   }
 }
 // END-OF-MAIN
