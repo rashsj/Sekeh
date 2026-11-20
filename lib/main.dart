@@ -66,6 +66,7 @@ class Notif {
 
 class Store extends ChangeNotifier {
   int themeIndex = 0, iconStyle = 0, iconPal = 0;
+  double balance = 22750;
   bool hideBalance = false, locked = false, sound = true, mascotOn = true;
   String pin = '1234', bizName = 'فروشگاه احمدی', tagline = 'پرداخت سریع و مطمئن با سِکّه';
   String phone = '0700123456', walletId = 'SEKKEH-0700', format = 'square';
