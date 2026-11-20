@@ -30,7 +30,12 @@ void main() {
         alignment: Alignment.center,
         child: Text(d.exceptionAsString(), textDirection: TextDirection.ltr, style: const TextStyle(color: Colors.white, fontSize: 10)),
       );
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light, systemNavigationBarColor: Color(0xFF0B1026), systemNavigationBarIconBrightness: Brightness.light));
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    systemNavigationBarColor: Color(0xFF141B3C),
+    systemNavigationBarIconBrightness: Brightness.light,
+  ));
   runApp(const SekkehApp());
 }
 
@@ -160,7 +165,13 @@ class SekkehApp extends StatelessWidget {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'سِکّه',
-        theme: ThemeData(useMaterial3: true, brightness: Brightness.dark, scaffoldBackgroundColor: kBg, colorScheme: ColorScheme.dark(primary: t.bg[1], secondary: t.accent, surface: kS1, onSurface: kInk), fontFamily: GoogleFonts.vazirmatn().fontFamily),
+        theme: ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: kBg,
+          colorScheme: ColorScheme.dark(primary: t.bg[1], secondary: t.accent, surface: kS1, onSurface: kInk),
+          fontFamily: GoogleFonts.vazirmatn().fontFamily,
+        ),
         home: const Gate(),
       );
     });
@@ -183,20 +194,22 @@ class _GateState extends State<Gate> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (done) return store.locked ? const Lock() : const Root();
     final t = store.theme;
-    return Scaffold(body: Container(
-      decoration: BoxDecoration(gradient: RadialGradient(center: const Alignment(0, -.7), radius: 1.1, colors: [t.bg[1], kBg])),
-      child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-        ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: Container(width: 104, height: 104, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [kGold2, kGold]), boxShadow: [BoxShadow(color: kGold.withOpacity(.5), blurRadius: 30)]), child: Center(child: Text('سکه', style: lalez(38, c: const Color(0xFF6B4708)))))),
-        const SizedBox(height: 18),
-        FadeTransition(opacity: c, child: Text('سِکّه', style: lalez(38, c: kGold))),
-        const SizedBox(height: 6),
-        FadeTransition(opacity: c, child: Text('کیف پول دیجیتال افغانستان', style: vaz(13, c: kMut))),
-        const SizedBox(height: 8),
-        FadeTransition(opacity: c, child: Text('Beheshti Brothers', style: inter(11, kMut))),
-        const SizedBox(height: 26),
-        const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: kGold)),
-      ])),
-    ));
+    return Scaffold(
+      backgroundColor: kBg,
+      body: Center(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: Container(width: 104, height: 104, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [kGold2, kGold]), boxShadow: [BoxShadow(color: kGold.withOpacity(.5), blurRadius: 30)]), child: Center(child: Text('سکه', style: lalez(38, c: const Color(0xFF6B4708)))))),
+          const SizedBox(height: 18),
+          FadeTransition(opacity: c, child: Text('سِکّه', style: lalez(38, c: kGold))),
+          const SizedBox(height: 6),
+          FadeTransition(opacity: c, child: Text('کیف پول دیجیتال افغانستان', style: vaz(13, c: kMut))),
+          const SizedBox(height: 8),
+          FadeTransition(opacity: c, child: Text('Beheshti Brothers', style: inter(11, kMut))),
+          const SizedBox(height: 26),
+          const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: kGold)),
+        ]),
+      ),
+    );
   }
 }
 
@@ -212,36 +225,51 @@ class _RootState extends State<Root> {
     final t = store.theme;
     store.ensurePhoto(t);
     final url = store.photoUrls[t.id];
+    final bottomPad = MediaQuery.of(context).padding.bottom;
     final pages = <Widget>[const Home(), const TxPage(), const CardPage(), const Profile()];
+
     return Scaffold(
-      extendBody: true,
-      body: Stack(children: [
-        Positioned.fill(child: ColoredBox(color: kBg)),
-        if (url != null) Positioned.fill(child: Opacity(opacity: .16, child: Image.network(url, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()))),
-        Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [kBg.withOpacity(.72), kBg.withOpacity(.94)])))),
-        Positioned.fill(child: IndexedStack(index: page, children: pages)),
-      ]),
+      backgroundColor: kBg,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: kBg,
+          image: (url != null && url.isNotEmpty) ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover, opacity: .16, onError: (_, __) {}) : null,
+          gradient: (url == null || url.isEmpty) ? LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [t.bg[0], kBg]) : null,
+        ),
+        child: IndexedStack(index: page, children: pages),
+      ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(8, 6, 8, MediaQuery.of(context).padding.bottom + 8),
-        decoration: BoxDecoration(color: kS1.withOpacity(.96), border: Border(top: BorderSide(color: Colors.white.withOpacity(.08)))),
+        decoration: BoxDecoration(color: kS1, border: Border(top: BorderSide(color: Colors.white.withOpacity(.08)))),
+        padding: EdgeInsets.fromLTRB(6, 8, 6, bottomPad + 10),
         child: Row(children: [
-          nav(0, Icons.home_rounded, 'خانه'),
-          nav(1, Icons.receipt_long_rounded, 'تراکنش‌ها'),
+          navItem(0, Icons.home_rounded, 'خانه'),
+          navItem(1, Icons.receipt_long_rounded, 'تراکنش‌ها'),
           Expanded(child: Center(child: GemFab(onTap: () => openFlow(context, 'transfer')))),
-          nav(2, Icons.qr_code_2_rounded, 'کارت من'),
-          nav(3, Icons.person_rounded, 'پروفایل'),
+          navItem(2, Icons.qr_code_2_rounded, 'کارت من'),
+          navItem(3, Icons.person_rounded, 'پروفایل'),
         ]),
       ),
     );
   }
-  Widget nav(int i, IconData ic, String label) {
+  Widget navItem(int i, IconData ic, String label) {
     final on = page == i;
     final t = store.theme;
-    return Expanded(child: InkWell(onTap: () => setState(() => page = i), borderRadius: BorderRadius.circular(14), child: Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Icon(ic, size: 24, color: on ? t.accent : kMut),
-      const SizedBox(height: 3),
-      Text(label, style: vaz(10, c: on ? t.accent : kMut, w: FontWeight.w700)),
-    ]))));
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => page = i),
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(ic, size: 23, color: on ? t.accent : kMut),
+            const SizedBox(height: 3),
+            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: vaz(9.5, c: on ? t.accent : kMut, w: FontWeight.w700)),
+          ]),
+        ),
+      ),
+    );
   }
 }
 
@@ -262,20 +290,29 @@ class _LockState extends State<Lock> {
   @override
   Widget build(BuildContext context) {
     final t = store.theme;
-    return Scaffold(body: Container(decoration: BoxDecoration(gradient: RadialGradient(center: const Alignment(0, -.6), radius: 1.1, colors: [t.bg[1], kBg])), child: SafeArea(child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      CircleAvatar(radius: 36, backgroundColor: t.bg[1], child: Text('ف', style: vaz(26, c: Colors.white, w: FontWeight.w900))),
-      const SizedBox(height: 12),
-      Text('فرید احمدزی', style: vaz(17, w: FontWeight.w900)),
-      const SizedBox(height: 4),
-      Text('رمز ۴ رقمی را وارد کنید', style: vaz(12, c: kMut)),
-      const SizedBox(height: 18),
-      Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(4, (i) => Container(margin: const EdgeInsets.symmetric(horizontal: 8), width: 15, height: 15, decoration: BoxDecoration(shape: BoxShape.circle, color: i < buf.length ? t.accent : Colors.transparent, border: Border.all(color: err ? kCoral : kMut, width: 2))))),
-      const SizedBox(height: 8),
-      SizedBox(height: 20, child: Text(err ? 'رمز اشتباه است' : '', style: vaz(12, c: kCoral, w: FontWeight.w700))),
-      SizedBox(width: 262, child: Keypad(onKey: key, round: true)),
-      const SizedBox(height: 12),
-      Text('رمز پیش‌فرض: ۱۲۳۴', style: vaz(10.5, c: kMut)),
-    ])))));
+    return Scaffold(
+      backgroundColor: kBg,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              CircleAvatar(radius: 36, backgroundColor: t.bg[1], child: Text('ف', style: vaz(26, c: Colors.white, w: FontWeight.w900))),
+              const SizedBox(height: 12),
+              Text('فرید احمدزی', style: vaz(17, w: FontWeight.w900)),
+              const SizedBox(height: 4),
+              Text('رمز ۴ رقمی را وارد کنید', style: vaz(12, c: kMut)),
+              const SizedBox(height: 18),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(4, (i) => Container(margin: const EdgeInsets.symmetric(horizontal: 8), width: 15, height: 15, decoration: BoxDecoration(shape: BoxShape.circle, color: i < buf.length ? t.accent : Colors.transparent, border: Border.all(color: err ? kCoral : kMut, width: 2))))),
+              const SizedBox(height: 8),
+              SizedBox(height: 20, child: Text(err ? 'رمز اشتباه است' : '', style: vaz(12, c: kCoral, w: FontWeight.w700))),
+              SizedBox(width: 262, child: Keypad(onKey: key, round: true)),
+              const SizedBox(height: 12),
+              Text('رمز پیش‌فرض: ۱۲۳۴', style: vaz(10.5, c: kMut)),
+            ]),
+          ),
+        ),
+      ),
+    );
   }
 }
 // END-OF-MAIN
