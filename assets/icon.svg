@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1B4D"/><stop offset=".55" stop-color="#4F46E5"/><stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2=".6" y2="1">
+      <stop offset="0" stop-color="#FFE9B0"/><stop offset=".5" stop-color="#F5B93E"/><stop offset="1" stop-color="#C98A16"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".95"/><stop offset="1" stop-color="#2DD4BF" stop-opacity=".55"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+  <circle cx="430" cy="86" r="150" fill="#ffffff" opacity=".07"/>
+  <circle cx="70" cy="450" r="120" fill="#000000" opacity=".12"/>
+  <ellipse cx="256" cy="268" rx="176" ry="60" fill="none" stroke="url(#ring)" stroke-width="15" opacity=".85" transform="rotate(-18 256 268)"/>
+  <circle cx="256" cy="248" r="126" fill="url(#gold)"/>
+  <circle cx="256" cy="248" r="104" fill="none" stroke="#8A5B00" stroke-opacity=".35" stroke-width="7"/>
+  <text x="256" y="300" text-anchor="middle" font-family="Amiri, serif" font-size="150" font-weight="bold" fill="#6B4708">س</text>
+  <ellipse cx="216" cy="196" rx="40" ry="18" fill="#ffffff" opacity=".33" transform="rotate(-28 216 196)"/>
+  <path d="M120 330 q136 78 272 -6" fill="none" stroke="url(#ring)" stroke-width="15" stroke-linecap="round" opacity=".95"/>
+  <circle cx="392" cy="322" r="13" fill="#ffffff" opacity=".95"/>
+</svg>
