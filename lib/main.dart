@@ -24,20 +24,26 @@ part 'profile.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light, systemNavigationBarColor: Color(0xFF081522), systemNavigationBarIconBrightness: Brightness.light));
+  ErrorWidget.builder = (FlutterErrorDetails d) => Container(
+        color: const Color(0xFF8B1D1D),
+        padding: const EdgeInsets.all(6),
+        alignment: Alignment.center,
+        child: Text(d.exceptionAsString(), textDirection: TextDirection.ltr, style: const TextStyle(color: Colors.white, fontSize: 10)),
+      );
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light, systemNavigationBarColor: Color(0xFF0B1026), systemNavigationBarIconBrightness: Brightness.light));
   runApp(const SekkehApp());
 }
 
-const Color kGold = Color(0xFFF4B740);
-const Color kGold2 = Color(0xFFFFD782);
-const Color kInk = Color(0xFFF1F6FC);
-const Color kMut = Color(0xFF9FB2C6);
-const Color kBg = Color(0xFF081522);
-const Color kS1 = Color(0xFF0F2236);
-const Color kS2 = Color(0xFF162F49);
-const Color kMint = Color(0xFF39D39B);
-const Color kCoral = Color(0xFFFF6B7D);
-const Color kCyan = Color(0xFF4CC9F0);
+const Color kGold = Color(0xFFF5B93E);
+const Color kGold2 = Color(0xFFFFDD93);
+const Color kInk = Color(0xFFF2F5FF);
+const Color kMut = Color(0xFFA3ADD4);
+const Color kBg = Color(0xFF0B1026);
+const Color kS1 = Color(0xFF141B3C);
+const Color kS2 = Color(0xFF1D2650);
+const Color kMint = Color(0xFF3ED9A0);
+const Color kCoral = Color(0xFFFF6B81);
+const Color kCyan = Color(0xFF2DD4BF);
 
 class GemTheme {
   final String id, name, place, wiki;
@@ -47,12 +53,12 @@ class GemTheme {
 }
 
 const List<GemTheme> kThemes = [
-  GemTheme('lapis', 'لاجورد • بند امیر', 'بند امیر، بامیان', 'Band-e_Amir_National_Park', [Color(0xFF06182E), Color(0xFF0B2A5E), Color(0xFF1D5DBB)], Color(0xFF04101F), Color(0xFFFFD782)),
-  GemTheme('ruby', 'لعل • پامیر', 'پامیر، بدخشان', 'Pamir_Mountains', [Color(0xFF2A0710), Color(0xFF4A0D22), Color(0xFFC2185B)], Color(0xFF1C040B), Color(0xFFFFD782)),
-  GemTheme('emerald', 'زمرد • پنجشیر', 'درهٔ پنجشیر', 'Panjshir_Valley', [Color(0xFF03271A), Color(0xFF043523), Color(0xFF0E8F5E)], Color(0xFF02180F), Color(0xFFFFE9B0)),
-  GemTheme('sapphire', 'یاقوت • هندوکش', 'هندوکش، کابل', 'Hindu_Kush', [Color(0xFF0A0A22), Color(0xFF1E1B6B), Color(0xFF4338CA)], Color(0xFF06061A), Color(0xFFBFE3FF)),
-  GemTheme('saffron', 'زعفران • هرات', 'مناره‌های هرات', 'Citadel_of_Herat', [Color(0xFF2A1604), Color(0xFF5A2E08), Color(0xFFC2691A)], Color(0xFF1A0E02), Color(0xFFFFD782)),
-  GemTheme('turquoise', 'فیروزه • مزار', 'روضهٔ شریف، مزارشریف', 'Shrine_of_Ali', [Color(0xFF032A31), Color(0xFF053A44), Color(0xFF0E7C8C)], Color(0xFF02181C), Color(0xFFFFE9B0)),
+  GemTheme('lapis', 'لاجورد • بند امیر', 'بند امیر، بامیان', 'Band-e_Amir_National_Park', [Color(0xFF0B1B4D), Color(0xFF4F46E5), Color(0xFF2DD4BF)], Color(0xFF070F2E), Color(0xFFFFDD93)),
+  GemTheme('ruby', 'لعل • پامیر', 'پامیر، بدخشان', 'Pamir_Mountains', [Color(0xFF2A0714), Color(0xFFC2185B), Color(0xFFFF7A9C)], Color(0xFF1A040C), Color(0xFFFFDD93)),
+  GemTheme('emerald', 'زمرد • پنجشیر', 'درهٔ پنجشیر', 'Panjshir_Valley', [Color(0xFF03271A), Color(0xFF0E8F5E), Color(0xFF5BE3A8)], Color(0xFF02180F), Color(0xFFFFE9B0)),
+  GemTheme('sapphire', 'یاقوت • هندوکش', 'هندوکش، کابل', 'Hindu_Kush', [Color(0xFF0A0A22), Color(0xFF4338CA), Color(0xFF818CF8)], Color(0xFF06061A), Color(0xFFBFE3FF)),
+  GemTheme('saffron', 'زعفران • هرات', 'مناره‌های هرات', 'Citadel_of_Herat', [Color(0xFF2A1604), Color(0xFFC2691A), Color(0xFFFFC46B)], Color(0xFF1A0E02), Color(0xFFFFDD93)),
+  GemTheme('turquoise', 'فیروزه • مزار', 'روضهٔ شریف، مزارشریف', 'Shrine_of_Ali', [Color(0xFF032A31), Color(0xFF0E7C8C), Color(0xFF4FD8E8)], Color(0xFF02181C), Color(0xFFFFE9B0)),
 ];
 
 class Tx {
@@ -133,7 +139,7 @@ String payload() => 'SEKKEH://pay?to=${Uri.encodeComponent(store.phone)}&biz=${U
 
 Future<String?> wikiThumb(String title) async {
   try {
-    final u = Uri.parse('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=1400&redirects=1&titles=${Uri.encodeComponent(title)}');
+    final u = Uri.parse('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=1200&redirects=1&titles=${Uri.encodeComponent(title)}');
     final r = await http.get(u);
     final m = RegExp(r'"source":"(https:[^"]+)"').firstMatch(r.body);
     return m?.group(1);
@@ -170,24 +176,27 @@ class _GateState extends State<Gate> with SingleTickerProviderStateMixin {
   late final AnimationController c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..forward();
   bool done = false;
   @override
-  void initState() { super.initState(); Timer(const Duration(milliseconds: 2000), () { if (mounted) setState(() => done = true); }); }
+  void initState() { super.initState(); Timer(const Duration(milliseconds: 1900), () { if (mounted) setState(() => done = true); }); }
   @override
   void dispose() { c.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) {
     if (done) return store.locked ? const Lock() : const Root();
     final t = store.theme;
-    return Scaffold(body: Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(0, -.7), radius: 1.1, colors: [t.bg[1], kBg])), child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: Container(width: 104, height: 104, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [kGold2, kGold]), boxShadow: [BoxShadow(color: kGold.withOpacity(.5), blurRadius: 30)]), child: Center(child: Text('سکه', style: lalez(38, c: const Color(0xFF6B4708)))))),
-      const SizedBox(height: 18),
-      FadeTransition(opacity: c, child: Text('سِکّه', style: lalez(38, c: kGold))),
-      const SizedBox(height: 6),
-      FadeTransition(opacity: c, child: Text('کیف پول دیجیتال افغانستان', style: vaz(13, c: kMut))),
-      const SizedBox(height: 8),
-      FadeTransition(opacity: c, child: Text('Beheshti Brothers', style: inter(11, kMut))),
-      const SizedBox(height: 26),
-      SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: kGold)),
-    ]))));
+    return Scaffold(body: Container(
+      decoration: BoxDecoration(gradient: RadialGradient(center: const Alignment(0, -.7), radius: 1.1, colors: [t.bg[1], kBg])),
+      child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        ScaleTransition(scale: CurvedAnimation(parent: c, curve: Curves.elasticOut), child: Container(width: 104, height: 104, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [kGold2, kGold]), boxShadow: [BoxShadow(color: kGold.withOpacity(.5), blurRadius: 30)]), child: Center(child: Text('سکه', style: lalez(38, c: const Color(0xFF6B4708)))))),
+        const SizedBox(height: 18),
+        FadeTransition(opacity: c, child: Text('سِکّه', style: lalez(38, c: kGold))),
+        const SizedBox(height: 6),
+        FadeTransition(opacity: c, child: Text('کیف پول دیجیتال افغانستان', style: vaz(13, c: kMut))),
+        const SizedBox(height: 8),
+        FadeTransition(opacity: c, child: Text('Beheshti Brothers', style: inter(11, kMut))),
+        const SizedBox(height: 26),
+        const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: kGold)),
+      ])),
+    ));
   }
 }
 
@@ -198,22 +207,23 @@ class Root extends StatefulWidget {
 }
 class _RootState extends State<Root> {
   int page = 0;
-  final pages = const [Home(), TxPage(), CardPage(), Profile()];
   @override
   Widget build(BuildContext context) {
     final t = store.theme;
     store.ensurePhoto(t);
     final url = store.photoUrls[t.id];
+    final pages = <Widget>[const Home(), const TxPage(), const CardPage(), const Profile()];
     return Scaffold(
       extendBody: true,
       body: Stack(children: [
-        if (url != null) Positioned.fill(child: Opacity(opacity: .16, child: Image.network(url, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox()))),
-        Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [kBg.withOpacity(.7), kBg.withOpacity(.92)])))),
-        IndexedStack(index: page, children: pages),
+        Positioned.fill(child: ColoredBox(color: kBg)),
+        if (url != null) Positioned.fill(child: Opacity(opacity: .16, child: Image.network(url, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()))),
+        Positioned.fill(child: DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [kBg.withOpacity(.72), kBg.withOpacity(.94)])))),
+        Positioned.fill(child: IndexedStack(index: page, children: pages)),
       ]),
       bottomNavigationBar: Container(
         padding: EdgeInsets.fromLTRB(8, 6, 8, MediaQuery.of(context).padding.bottom + 8),
-        decoration: BoxDecoration(color: kS1.withOpacity(.94), border: Border(top: BorderSide(color: Colors.white.withOpacity(.08)))),
+        decoration: BoxDecoration(color: kS1.withOpacity(.96), border: Border(top: BorderSide(color: Colors.white.withOpacity(.08)))),
         child: Row(children: [
           nav(0, Icons.home_rounded, 'خانه'),
           nav(1, Icons.receipt_long_rounded, 'تراکنش‌ها'),
@@ -231,8 +241,6 @@ class _RootState extends State<Root> {
       Icon(ic, size: 24, color: on ? t.accent : kMut),
       const SizedBox(height: 3),
       Text(label, style: vaz(10, c: on ? t.accent : kMut, w: FontWeight.w700)),
-      const SizedBox(height: 3),
-      Container(width: 5, height: 5, decoration: BoxDecoration(shape: BoxShape.circle, color: on ? t.accent : Colors.transparent)),
     ]))));
   }
 }
@@ -254,7 +262,7 @@ class _LockState extends State<Lock> {
   @override
   Widget build(BuildContext context) {
     final t = store.theme;
-    return Scaffold(body: Container(decoration: BoxDecoration(gradient: RadialGradient(center: Alignment(0, -.6), radius: 1.1, colors: [t.bg[1], kBg])), child: SafeArea(child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+    return Scaffold(body: Container(decoration: BoxDecoration(gradient: RadialGradient(center: const Alignment(0, -.6), radius: 1.1, colors: [t.bg[1], kBg])), child: SafeArea(child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
       CircleAvatar(radius: 36, backgroundColor: t.bg[1], child: Text('ف', style: vaz(26, c: Colors.white, w: FontWeight.w900))),
       const SizedBox(height: 12),
       Text('فرید احمدزی', style: vaz(17, w: FontWeight.w900)),
@@ -266,7 +274,8 @@ class _LockState extends State<Lock> {
       SizedBox(height: 20, child: Text(err ? 'رمز اشتباه است' : '', style: vaz(12, c: kCoral, w: FontWeight.w700))),
       SizedBox(width: 262, child: Keypad(onKey: key, round: true)),
       const SizedBox(height: 12),
-      Text('رمز پیش‌فرض: ۱۲۳۴', style: vaz(10.5, c: kMut.withOpacity(.7))),
+      Text('رمز پیش‌فرض: ۱۲۳۴', style: vaz(10.5, c: kMut)),
     ])))));
   }
 }
+// END-OF-MAIN
